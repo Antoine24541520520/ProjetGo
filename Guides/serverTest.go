@@ -1,3 +1,4 @@
+// go build serverTest.go && ./serverTest
 package main
 
 import (
@@ -12,6 +13,12 @@ const (
 	maxClients = 4
 )
 
+var (
+	clientCount int
+	clients     = make(map[net.Conn]struct{})
+	mu          sync.Mutex
+)
+
 func main() {
 	listener, err := net.Listen("tcp", ":1234")
 	if err != nil {
@@ -23,7 +30,7 @@ func main() {
 	fmt.Println("TCP server listening on localhost:1234...")
 
 	var wg sync.WaitGroup
-	clientCount := 0
+
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
@@ -31,14 +38,22 @@ func main() {
 			continue
 		}
 
+		mu.Lock()
 		if clientCount >= maxClients {
-			fmt.Fprintln(conn, "Too much client")
-			conn.Close()
+			mu.Unlock()
 			continue
 		}
 
-		wg.Add(1)
 		clientCount++
+		clients[conn] = struct{}{}
+		if clientCount == maxClients {
+			for clientConn := range clients {
+				fmt.Fprintln(clientConn, "Ready")
+			}
+		}
+		mu.Unlock()
+
+		wg.Add(1)
 		go handleConnection(conn, &wg)
 	}
 
@@ -63,7 +78,16 @@ func handleConnection(conn net.Conn, wg *sync.WaitGroup) {
 			break
 		}
 
-		fmt.Printf("Message from %s: %s", conn.RemoteAddr(), msg)
+		if msg == "space" {
+			fmt.Printf("%s a appuyé sur Espace \n", conn.RemoteAddr().String())
+			mu.Lock()
+			for clientConn := range clients {
+				if clientConn != conn {
+					fmt.Fprintln(clientConn, conn.RemoteAddr().String()+" a appuyé sur Espace")
+				}
+			}
+			mu.Unlock()
+		}
 
 		if _, err := writer.WriteString("Received: " + msg); err != nil {
 			fmt.Printf("Error writing message to %s: %v\n", conn.RemoteAddr(), err)
@@ -75,6 +99,11 @@ func handleConnection(conn net.Conn, wg *sync.WaitGroup) {
 			break
 		}
 	}
+
+	mu.Lock()
+	clientCount--
+	delete(clients, conn)
+	mu.Unlock()
 
 	fmt.Printf("Client %s disconnected\n", conn.RemoteAddr())
 }
