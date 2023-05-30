@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"time"
 )
 
 func main() {
@@ -25,12 +26,23 @@ func dialAndListen() {
 	if err != nil {
 		log.Fatalln(err)
 	}
+	defer conn.Close()
 	fmt.Fprintln(conn, "salut la team ")
+
+	go func() {
+		ticker := time.NewTicker(5 * time.Second)
+		for {
+			select {
+			case <-ticker.C:
+				fmt.Fprintln(conn, "Ping")
+			}
+		}
+	}()
+
 	scanner := bufio.NewScanner(conn)
 	for scanner.Scan() {
 		token := scanner.Text()
 		fmt.Println("receive:", token)
-		fmt.Fprintln(conn, "ack", token)
 		if "stop" == token {
 			fmt.Fprintln(conn, "stop")
 			break

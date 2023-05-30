@@ -25,13 +25,15 @@ func main() {
 	var wg sync.WaitGroup
 	clientCount := 0
 	for {
-		if clientCount >= maxClients {
-			break
-		}
-
 		conn, err := listener.Accept()
 		if err != nil {
 			fmt.Printf("Error accepting connection: %v\n", err)
+			continue
+		}
+
+		if clientCount >= maxClients {
+			fmt.Fprintln(conn, "Too much client")
+			conn.Close()
 			continue
 		}
 
