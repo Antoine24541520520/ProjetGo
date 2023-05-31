@@ -39,20 +39,30 @@ func (g *Game) DrawWelcomeScreen(screen *ebiten.Image) {
 
 var ipInput string
 
-// DrawJoinServerScreen displays the IP of server
 func (g *Game) DrawJoinServerScreen(screen *ebiten.Image) {
-	ebitenutil.DebugPrintAt(
-		screen,
-		fmt.Sprintf("Enter Server IP: %s", ipInput),
-		screenWidth/2-120,
-		screenHeight/2-20,
-	)
-	ebitenutil.DebugPrintAt(
-		screen,
-		fmt.Sprint("Press Enter to join"),
-		screenWidth/2-60,
-		screenHeight/2+10,
-	)
+    ebitenutil.DebugPrintAt(
+        screen,
+        fmt.Sprintf("Enter Server IP: %s", ipInput),
+        screenWidth/2-120,
+        screenHeight/2-20,
+    )
+
+    if g.joinServerStep == 2 {
+        // Use DebugPrintAt with color for the error message.
+        ebitenutil.DebugPrintAt(
+            screen,
+            "Invalid IP",
+            screenWidth/2-50,
+            screenHeight/2+30,
+        )
+    }
+
+    ebitenutil.DebugPrintAt(
+        screen,
+        fmt.Sprint("Press Enter to join"),
+        screenWidth/2-60,
+        screenHeight/2+10,
+    )
 }
 
 // DrawSelectScreen displays the runner selection screen in the game window

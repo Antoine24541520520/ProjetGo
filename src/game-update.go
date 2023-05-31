@@ -42,6 +42,7 @@ func connectToServer(serverName string) error {
 	// Your server connection code here
 	return nil
 }
+
 func (g *Game) HandleJoinServerScreen() bool {
 	if inpututil.IsKeyJustPressed(ebiten.KeyBackspace) && len(ipInput) > 0 {
 		ipInput = ipInput[:len(ipInput)-1]
@@ -50,11 +51,13 @@ func (g *Game) HandleJoinServerScreen() bool {
 	if ebiten.IsKeyPressed(ebiten.KeyEnter) {
 		if validIP(ipInput) {
 			fmt.Println("IP address is valid:", ipInput)
+			g.joinServerStep = 1
 			return true
 		} else {
 			fmt.Println("Invalid IP address:", ipInput)
 			// clear ipInput for a new attempt
 			ipInput = ""
+			g.joinServerStep = 2
 		}
 	} else {
 		keys := ebiten.InputChars()
@@ -67,10 +70,12 @@ func (g *Game) HandleJoinServerScreen() bool {
 
 	return false
 }
-func validIP(ip string) bool {
-	parsedIP := net.ParseIP(ip)
-	return parsedIP != nil
-}
+
+
+	func validIP(ip string) bool {
+		parsedIP := net.ParseIP(ip)
+		return parsedIP != nil
+	}
 
 // ChooseRunners loops over all the runners to check which sprite each
 // of them selected

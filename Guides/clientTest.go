@@ -13,7 +13,7 @@ func main() {
 }
 
 func dialAndListen() {
-	local := false
+	local := true
 
 	ip := "172.21.65.21"
 
@@ -27,7 +27,7 @@ func dialAndListen() {
 		log.Fatalln(err)
 	}
 	defer conn.Close()
-	fmt.Fprintln(conn, "space")
+	fmt.Fprintln(conn, "salut la team ")
 
 	go func() {
 		ticker := time.NewTicker(5 * time.Second)
