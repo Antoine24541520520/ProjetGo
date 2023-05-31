@@ -45,23 +45,27 @@ type Runner struct {
 // ManualUpdate allows to use the keyboard in order to control a runner
 // when the game is in the StateRun state (i.e. during a run)
 func (r *Runner) ManualUpdate() {
-	r.UpdateSpeed(inpututil.IsKeyJustPressed(ebiten.KeySpace))
+	r.UpdateSpeed(inpututil.IsKeyJustPressed(ebiten.KeySpace), true)
 	r.UpdatePos()
 }
 
 // RandomUpdate allows to randomly control a runner when the game is in
 // the StateRun state (i.e. during a run)
 func (r *Runner) RandomUpdate() {
-	r.UpdateSpeed(rand.Intn(3) == 0)
+	r.UpdateSpeed(rand.Intn(3) == 0, false)
 	r.UpdatePos()
 }
 
 // UpdateSpeed sets the speed of a runner. It is used when the game is in
 // StateRun state (i.e. during a run)
-func (r *Runner) UpdateSpeed(keyPressed bool) {
+func (r *Runner) UpdateSpeed(keyPressed bool, isManualPlayer bool) {
 	if !r.arrived {
 		r.framesSinceUpdate++
 		if keyPressed {
+			if isManualPlayer {
+				println("space")
+
+			}
 			r.speed = 1500 / float64(r.framesSinceUpdate*r.framesSinceUpdate*r.framesSinceUpdate)
 			if r.speed > 10 {
 				r.speed = 10

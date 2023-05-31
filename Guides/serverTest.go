@@ -78,7 +78,7 @@ func handleConnection(conn net.Conn, wg *sync.WaitGroup) {
 			break
 		}
 
-		if msg == "space" {
+		if msg == "space\n" {
 			fmt.Printf("%s a appuyé sur Espace \n", conn.RemoteAddr().String())
 			mu.Lock()
 			for clientConn := range clients {
