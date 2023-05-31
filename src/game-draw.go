@@ -37,33 +37,19 @@ func (g *Game) DrawWelcomeScreen(screen *ebiten.Image) {
 	)
 }
 
-// DrawCreateServerScreen displays the IP of server
-func (g *Game) DrawCreateServerScreen(screen *ebiten.Image) {
-	ebitenutil.DebugPrintAt(
-		screen,
-		fmt.Sprint("Test salut la team"),
-		screenWidth/2-120,
-		screenHeight/2-20,
-	)
-	ebitenutil.DebugPrintAt(
-		screen,
-		fmt.Sprint("Ouais"),
-		screenWidth/2-60,
-		screenHeight/2+10,
-	)
-}
+var ipInput string
 
 // DrawJoinServerScreen displays the IP of server
 func (g *Game) DrawJoinServerScreen(screen *ebiten.Image) {
 	ebitenutil.DebugPrintAt(
 		screen,
-		fmt.Sprint("Test salut la team join"),
+		fmt.Sprintf("Enter Server IP: %s", ipInput),
 		screenWidth/2-120,
 		screenHeight/2-20,
 	)
 	ebitenutil.DebugPrintAt(
 		screen,
-		fmt.Sprint("Ouais join"),
+		fmt.Sprint("Press Enter to join"),
 		screenWidth/2-60,
 		screenHeight/2+10,
 	)
@@ -147,10 +133,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	switch g.state {
 	case StateWelcomeScreen:
 		g.DrawWelcomeScreen(screen)
-	case StateCreateServer:
-		g.DrawCreateServerScreen(screen)
 	case StateJoinServer:
-		g.StateJoinServer(screen)
+		g.DrawJoinServerScreen(screen)
 	case StateChooseRunner:
 		g.DrawSelectScreen(screen)
 	case StateLaunchRun:

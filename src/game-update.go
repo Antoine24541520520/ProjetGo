@@ -16,6 +16,8 @@
 package main
 
 import (
+	"fmt"
+	"net"
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -36,8 +38,38 @@ func (g *Game) HandleCreateServerScreen() bool {
 
 // HandleWelcomeScreen waits for the player to push SPACE in order to
 // start the game
+func connectToServer(serverName string) error {
+	// Your server connection code here
+	return nil
+}
 func (g *Game) HandleJoinServerScreen() bool {
-	return inpututil.IsKeyJustPressed(ebiten.KeySpace)
+	if inpututil.IsKeyJustPressed(ebiten.KeyBackspace) && len(ipInput) > 0 {
+		ipInput = ipInput[:len(ipInput)-1]
+	}
+
+	if ebiten.IsKeyPressed(ebiten.KeyEnter) {
+		if validIP(ipInput) {
+			fmt.Println("IP address is valid:", ipInput)
+			return true
+		} else {
+			fmt.Println("Invalid IP address:", ipInput)
+			// clear ipInput for a new attempt
+			ipInput = ""
+		}
+	} else {
+		keys := ebiten.InputChars()
+		for _, key := range keys {
+			if len(ipInput) < 15 {
+				ipInput += string(key)
+			}
+		}
+	}
+
+	return false
+}
+func validIP(ip string) bool {
+	parsedIP := net.ParseIP(ip)
+	return parsedIP != nil
 }
 
 // ChooseRunners loops over all the runners to check which sprite each
@@ -125,11 +157,6 @@ func (g *Game) Update() error {
 	switch g.state {
 	case StateWelcomeScreen:
 		done := g.HandleWelcomeScreen()
-		if done {
-			g.state++
-		}
-	case StateCreateServer:
-		done := g.HandleCreateServerScreen()
 		if done {
 			g.state++
 		}

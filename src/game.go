@@ -30,10 +30,11 @@ type Game struct {
 // These constants define the five possible states of the game
 const (
 	StateWelcomeScreen int = iota // Title screen
-	StateChooseRunner             // Player selection screen
-	StateLaunchRun                // Countdown before a run
-	StateRun                      // Run
-	StateResult                   // Results announcement
+	StateJoinServer
+	StateChooseRunner // Player selection screen
+	StateLaunchRun    // Countdown before a run
+	StateRun          // Run
+	StateResult       // Results announcement
 )
 
 // InitGame builds a new game ready for being run by ebiten
