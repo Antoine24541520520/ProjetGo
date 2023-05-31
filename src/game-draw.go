@@ -48,12 +48,21 @@ func (g *Game) DrawJoinServerScreen(screen *ebiten.Image) {
     )
 
     if g.joinServerStep == 2 {
-        // Use DebugPrintAt with color for the error message.
+        // Create a red rectangle image
+        rectImg := ebiten.NewImage(100, 25) // Adjust size to match your text
+        rectImg.Fill(color.RGBA{255, 0, 0, 135}) // Change 80 to 255 for a solid color
+
+        // Draw the red rectangle image on the screen
+        opts := &ebiten.DrawImageOptions{}
+        opts.GeoM.Translate(float64(screenWidth/2-50), float64(screenHeight/2+36)) // Adjust position to match your text
+        screen.DrawImage(rectImg, opts)
+
+        // Now draw the text
         ebitenutil.DebugPrintAt(
             screen,
             "Invalid IP",
-            screenWidth/2-50,
-            screenHeight/2+30,
+            screenWidth/2-30,
+            screenHeight/2+40,
         )
     }
 
@@ -64,6 +73,7 @@ func (g *Game) DrawJoinServerScreen(screen *ebiten.Image) {
         screenHeight/2+10,
     )
 }
+
 
 // DrawSelectScreen displays the runner selection screen in the game window
 func (g *Game) DrawSelectScreen(screen *ebiten.Image) {

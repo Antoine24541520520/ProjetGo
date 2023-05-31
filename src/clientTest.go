@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func main() {
+func client() {
 	dialAndListen()
 }
 

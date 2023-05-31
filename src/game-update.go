@@ -55,7 +55,6 @@ func (g *Game) HandleJoinServerScreen() bool {
 			return true
 		} else {
 			fmt.Println("Invalid IP address:", ipInput)
-			// clear ipInput for a new attempt
 			ipInput = ""
 			g.joinServerStep = 2
 		}
@@ -68,6 +67,10 @@ func (g *Game) HandleJoinServerScreen() bool {
 		}
 	}
 
+	if ipInput != "" {
+		g.joinServerStep = 1
+	}
+	
 	return false
 }
 
