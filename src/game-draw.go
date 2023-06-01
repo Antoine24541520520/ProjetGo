@@ -74,7 +74,7 @@ func (g *Game) DrawJoinServerScreen(screen *ebiten.Image) {
 func (g *Game) DrawLobbyScreen(screen *ebiten.Image) {
 	ebitenutil.DebugPrintAt(
 		screen,
-		fmt.Sprintf("Players: %s/4", g.client_connection),
+		fmt.Sprintf("Players: %s/4", g.numClient),
 		screenWidth/2-60,
 		screenHeight/2-20,
 	)
@@ -160,6 +160,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		g.DrawWelcomeScreen(screen)
 	case StateJoinServer:
 		g.DrawJoinServerScreen(screen)
+	case StateLobbyScreen:
+		g.DrawLobbyScreen(screen)
 	case StateChooseRunner:
 		g.DrawSelectScreen(screen)
 	case StateLaunchRun:

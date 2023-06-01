@@ -20,6 +20,7 @@ var (
 )
 
 func main() {
+
 	listener, err := net.Listen("tcp", ":1234")
 	if err != nil {
 		fmt.Printf("Error listening on port 1234: %v\n", err)
@@ -46,6 +47,11 @@ func main() {
 
 		clientCount++
 		clients[conn] = struct{}{}
+		fmt.Printf("num_client#%v", clientCount)
+		for clientConn := range clients {
+
+			fmt.Fprintf(clientConn, "num_client#%v\n", clientCount)
+		}
 		if clientCount == maxClients {
 			for clientConn := range clients {
 				fmt.Fprintln(clientConn, "Ready")
@@ -89,7 +95,7 @@ func handleConnection(conn net.Conn, wg *sync.WaitGroup) {
 			mu.Unlock()
 		}
 
-		if _, err := writer.WriteString("Received: " + msg); err != nil {
+		if _, err := writer.WriteString(msg); err != nil {
 			fmt.Printf("Error writing message to %s: %v\n", conn.RemoteAddr(), err)
 			break
 		}
@@ -103,7 +109,10 @@ func handleConnection(conn net.Conn, wg *sync.WaitGroup) {
 	mu.Lock()
 	clientCount--
 	delete(clients, conn)
-	mu.Unlock()
+	for clientConn := range clients {
 
+		fmt.Fprintf(clientConn, "num_client#%v\n", clientCount)
+	}
+	mu.Unlock()
 	fmt.Printf("Client %s disconnected\n", conn.RemoteAddr())
 }
