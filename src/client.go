@@ -15,10 +15,9 @@ func client(g *Game, ip string) error {
 	if err != nil {
 		return err
 	}
-	defer g.client_connection.Close()
 
-	// Send "Ping" message
-	sendSpace(g.client_connection)
+	fmt.Println("Client connecté")
+	defer g.client_connection.Close()
 
 	scanner := bufio.NewScanner(g.client_connection)
 	for scanner.Scan() {
@@ -47,5 +46,5 @@ func client(g *Game, ip string) error {
 }
 
 func sendSpace(conn net.Conn) {
-	fmt.Fprintln(conn, "Ping")
+	fmt.Fprintln(conn, "space")
 }
