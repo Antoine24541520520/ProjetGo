@@ -12,22 +12,23 @@ import (
 	"course/assets"
 	"image"
 	"log"
-	"time"
 	"net"
+	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
 type Game struct {
-	state       int           // Current state of the game
-	runnerImage *ebiten.Image // Image with all the sprites of the runners
-	runners     [4]Runner     // The four runners used in the game
-	f           Field         // The running field
-	client_connection net.Conn // connection between client and server   
-	joinServerStep int        // Current step in JoinServer state
-	launchStep  int           // Current step in StateLaunchRun state
-	resultStep  int           // Current step in StateResult state
-	getTPS      bool          // Help for debug
+	state             int // Current state of the game
+	ipInput           string
+	runnerImage       *ebiten.Image // Image with all the sprites of the runners
+	runners           [4]Runner     // The four runners used in the game
+	f                 Field         // The running field
+	client_connection net.Conn      // connection between client and server
+	joinServerStep    int           // Current step in JoinServer state
+	launchStep        int           // Current step in StateLaunchRun state
+	resultStep        int           // Current step in StateResult state
+	getTPS            bool          // Help for debug
 }
 
 // These constants define the five possible states of the game

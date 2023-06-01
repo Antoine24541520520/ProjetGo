@@ -16,11 +16,9 @@
 package main
 
 import (
-	"fmt"
 	"net"
 	"time"
-	"context"
-	"errors"
+
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
@@ -45,33 +43,31 @@ func connectToServer(serverName string) error {
 }
 
 func (g *Game) HandleJoinServerScreen() bool {
-    if inpututil.IsKeyJustPressed(ebiten.KeyBackspace) && len(ipInput) > 0 {
-        ipInput = ipInput[:len(ipInput)-1]
-    }
+	if inpututil.IsKeyJustPressed(ebiten.KeyBackspace) && len(g.ipInput) > 0 {
+		g.ipInput = g.ipInput[:len(g.ipInput)-1]
+	}
 
-    if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
-        if validIP(ipInput) {			
-			go client(g, ipInput)
-			ipInput = ""
+	if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
+		if validIP(g.ipInput) {
+			go client(g, g.ipInput)
+			g.ipInput = ""
 			g.joinServerStep = 2
 		}
-    } else {
-        keys := ebiten.InputChars()
-        for _, key := range keys {
-            if len(ipInput) < 15 && key != ' ' {
-                ipInput += string(key)
-            }
-        }
-    }
-	
-    if ipInput != "" {
-        g.joinServerStep = 1
-    }
+	} else {
+		keys := ebiten.InputChars()
+		for _, key := range keys {
+			if len(g.ipInput) < 15 && key != ' ' {
+				g.ipInput += string(key)
+			}
+		}
+	}
 
-    return false
+	if g.ipInput != "" {
+		g.joinServerStep = 1
+	}
+
+	return false
 }
-
-
 
 func validIP(ip string) bool {
 	parsedIP := net.ParseIP(ip)

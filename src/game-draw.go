@@ -1,13 +1,13 @@
 /*
-//  Implementation of the Draw method for the Game structure
-//  This method is called once at every frame (60 frames per second)
-//  by ebiten, juste after calling the Update method (game-update.go)
-//  Provided with a few utilitary methods:
-//    - DrawLaunch
-//    - DrawResult
-//    - DrawRun
-//    - DrawSelectScreen
-//    - DrawWelcomeScreen
+// Implementation of the Draw method for the Game structure
+// This method is called once at every frame (60 frames per second)
+// by ebiten, juste after calling the Update method (game-update.go)
+// Provided with a few utilitary methods:
+// - DrawLaunch
+// - DrawResult
+// - DrawRun
+// - DrawSelectScreen
+// - DrawWelcomeScreen
 */
 
 package main
@@ -37,43 +37,48 @@ func (g *Game) DrawWelcomeScreen(screen *ebiten.Image) {
 	)
 }
 
-var ipInput string
-
 func (g *Game) DrawJoinServerScreen(screen *ebiten.Image) {
-    ebitenutil.DebugPrintAt(
-        screen,
-        fmt.Sprintf("Enter Server IP: %s", ipInput),
-        screenWidth/2-120,
-        screenHeight/2-20,
-    )
+	ebitenutil.DebugPrintAt(
+		screen,
+		fmt.Sprintf("Enter Server IP: %s", g.ipInput),
+		screenWidth/2-120,
+		screenHeight/2-20,
+	)
 
-    if g.joinServerStep == 2 {
-        // Create a red rectangle image
-        rectImg := ebiten.NewImage(100, 25) // Adjust size to match your text
-        rectImg.Fill(color.RGBA{255, 0, 0, 135}) // Change 80 to 255 for a solid color
+	if g.joinServerStep == 2 {
+		// Create a red rectangle image
+		rectImg := ebiten.NewImage(100, 25)      // Adjust size to match your text
+		rectImg.Fill(color.RGBA{255, 0, 0, 135}) // Change 80 to 255 for a solid color
 
-        // Draw the red rectangle image on the screen
-        opts := &ebiten.DrawImageOptions{}
-        opts.GeoM.Translate(float64(screenWidth/2-50), float64(screenHeight/2+36)) // Adjust position to match your text
-        screen.DrawImage(rectImg, opts)
+		// Draw the red rectangle image on the screen
+		opts := &ebiten.DrawImageOptions{}
+		opts.GeoM.Translate(float64(screenWidth/2-50), float64(screenHeight/2+36)) // Adjust position to match your text
+		screen.DrawImage(rectImg, opts)
 
-        // Now draw the text
-        ebitenutil.DebugPrintAt(
-            screen,
-            "Invalid IP",
-            screenWidth/2-30,
-            screenHeight/2+40,
-        )
-    }
+		// Now draw the text
+		ebitenutil.DebugPrintAt(
+			screen,
+			"Invalid IP",
+			screenWidth/2-30,
+			screenHeight/2+40,
+		)
+	}
 
-    ebitenutil.DebugPrintAt(
-        screen,
-        fmt.Sprint("Press Enter to join"),
-        screenWidth/2-60,
-        screenHeight/2+10,
-    )
+	ebitenutil.DebugPrintAt(
+		screen,
+		fmt.Sprint("Press Enter to join"),
+		screenWidth/2-60,
+		screenHeight/2+10,
+	)
 }
-
+func (g *Game) DrawLobbyScreen(screen *ebiten.Image) {
+	ebitenutil.DebugPrintAt(
+		screen,
+		fmt.Sprintf("Players: %s/4", g.client_connection),
+		screenWidth/2-60,
+		screenHeight/2-20,
+	)
+}
 
 // DrawSelectScreen displays the runner selection screen in the game window
 func (g *Game) DrawSelectScreen(screen *ebiten.Image) {
@@ -131,7 +136,7 @@ func (g *Game) DrawResult(screen *ebiten.Image) {
 
 	for i := 1; i < g.resultStep && i <= 4; i++ {
 		s, ms := GetSeconds(g.runners[ranking[i-1]].runTime.Milliseconds())
-		ebitenutil.DebugPrintAt(screen, fmt.Sprint(i, ". P", ranking[i-1], "     ", s, ":", ms), screenWidth/2-40, 55+ranking[i-1]*20)
+		ebitenutil.DebugPrintAt(screen, fmt.Sprint(i, ". P", ranking[i-1], " ", s, ":", ms), screenWidth/2-40, 55+ranking[i-1]*20)
 	}
 
 	if g.resultStep > 4 {
