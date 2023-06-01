@@ -7,18 +7,7 @@ import (
 	"strings"
 )
 
-func client(g *Game, ip string) error {
-	port := "1234"
-
-	var err error
-	g.client_connection, err = net.Dial("tcp", ip+":"+port)
-	if err != nil {
-		return err
-	}
-
-	fmt.Println("Client connecté")
-	defer g.client_connection.Close()
-
+func receiveMessage(g Game){
 	scanner := bufio.NewScanner(g.client_connection)
 	for scanner.Scan() {
 		token := scanner.Text()
@@ -33,18 +22,16 @@ func client(g *Game, ip string) error {
 			break
 		}
 		if tokenSplited[0] == "num_client" {
-			fmt.Println(tokenSplited[1])
 			g.numClient = tokenSplited[1]
 		}
 	}
-
+	
 	if err := scanner.Err(); err != nil {
-		return err
+		fmt.Println("Error:", err)
 	}
-
-	return nil
 }
 
 func sendSpace(conn net.Conn) {
 	fmt.Fprintln(conn, "space")
+	fmt.Println("space")
 }
