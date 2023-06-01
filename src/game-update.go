@@ -59,6 +59,13 @@ func (g *Game) HandleJoinServerScreen() bool {
 
 	return false
 }
+func (g *Game) HandleLobbyScreen() bool {
+	println(g.lobbyReady)
+	if g.lobbyReady {
+		return true
+	}
+	return false
+}
 
 func validIP(ip string) bool {
 	parsedIP := net.ParseIP(ip)
@@ -155,6 +162,11 @@ func (g *Game) Update() error {
 		}
 	case StateJoinServer:
 		done := g.HandleJoinServerScreen()
+		if done {
+			g.state++
+		}
+	case StateLobbyScreen:
+		done := g.HandleLobbyScreen()
 		if done {
 			g.state++
 		}
