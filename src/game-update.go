@@ -29,18 +29,6 @@ func (g *Game) HandleWelcomeScreen() bool {
 	return inpututil.IsKeyJustPressed(ebiten.KeySpace)
 }
 
-// HandleWelcomeScreen waits for the player to push SPACE in order to
-// start the game
-func (g *Game) HandleCreateServerScreen() bool {
-	return inpututil.IsKeyJustPressed(ebiten.KeySpace)
-}
-
-// HandleWelcomeScreen waits for the player to push SPACE in order to
-// start the game
-func connectToServer(serverName string) error {
-	// Your server connection code here
-	return nil
-}
 
 func (g *Game) HandleJoinServerScreen() bool {
 	if inpututil.IsKeyJustPressed(ebiten.KeyBackspace) && len(g.ipInput) > 0 {
@@ -50,8 +38,11 @@ func (g *Game) HandleJoinServerScreen() bool {
 	if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
 		if validIP(g.ipInput) {
 			go client(g, g.ipInput)
+			return true
+		} else {
 			g.ipInput = ""
 			g.joinServerStep = 2
+			return false
 		}
 	} else {
 		keys := ebiten.InputChars()
@@ -105,9 +96,9 @@ func (g *Game) HandleLaunchRun() bool {
 func (g *Game) UpdateRunners() {
 	for i := range g.runners {
 		if i == 0 {
-			g.runners[i].ManualUpdate()
+			g.runners[i].ManualUpdate(g)
 		} else {
-			g.runners[i].RandomUpdate()
+			g.runners[i].RandomUpdate(g)
 		}
 	}
 }
