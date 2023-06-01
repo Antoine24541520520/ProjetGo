@@ -5,12 +5,6 @@ import (
 	"fmt"
 	"net"
 	"strings"
-	"sync"
-)
-
-var (
-	lockedFlag bool
-	lockMu     sync.Mutex
 )
 
 func client(g *Game, ip string) error {
@@ -56,10 +50,5 @@ func sendSpace(conn net.Conn) {
 	fmt.Fprintln(conn, "space")
 }
 func sendLockChoice(conn net.Conn) {
-	lockMu.Lock()
-	if !lockedFlag {
-		fmt.Fprintln(conn, "locked")
-		lockedFlag = true
-	}
-	lockMu.Unlock()
+	fmt.Fprintln(conn, "locked")
 }
