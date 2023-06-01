@@ -16,6 +16,7 @@
 package main
 
 import (
+	"fmt"
 	"net"
 	"time"
 
@@ -35,32 +36,79 @@ func (g *Game) HandleJoinServerScreen() bool {
 		g.ipInput = g.ipInput[:len(g.ipInput)-1]
 	}
 
-	if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
-		if validIP(g.ipInput) {
-			go client(g, g.ipInput)
-			return true
-		} else {
-			g.ipInput = ""
-			g.joinServerStep = 2
+	if g.tryingToConnect {
+		select {
+		case status := <-g.connectionStatusChan:
+			if status == 1 {
+				g.tryingToConnect = false
+				return true
+			}
+			if status == 3 {
+				g.tryingToConnect = false
+				return false
+			}
+		default:
+			// Still connecting...
 			return false
 		}
-	} else {
-		keys := ebiten.InputChars()
-		for _, key := range keys {
-			if len(g.ipInput) < 15 && key != ' ' {
-				g.ipInput += string(key)
-			}
+	} else if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
+		if validIP(g.ipInput) {
+			g.tryingToConnect = true
+			g.connectionStatusChan = make(chan int, 1)
+			go func() {
+				port := "1234"
+				connChan := make(chan net.Conn, 1)
+				errChan := make(chan error, 1)
+				go func() {
+					conn, err := net.Dial("tcp", g.ipInput+":"+port)
+					if err != nil {
+						errChan <- err
+						return
+					}
+					connChan <- conn
+				}()
+
+				select {
+				case err := <-errChan:
+					g.joinServerErrorCode = 3
+					g.client_Error_Messages = err.Error()
+					g.ipInput = ""
+					g.connectionStatusChan <- 3
+				case conn := <-connChan:
+					g.client_connection = conn
+					fmt.Println("Client connecté")
+					go receiveMessage(g)
+					g.connectionStatusChan <- 1
+				case <-time.After(5 * time.Second):
+					g.joinServerErrorCode = 3
+					g.client_Error_Messages = "Connection timeout"
+					g.ipInput = ""
+					g.connectionStatusChan <- 3
+				}
+			}()
+		} else {
+			g.ipInput = ""
+			g.joinServerErrorCode = 2
+			return false
+		}
+	}
+
+	keys := ebiten.InputChars()
+	for _, key := range keys {
+		if len(g.ipInput) < 15 && key != ' ' {
+			g.ipInput += string(key)
 		}
 	}
 
 	if g.ipInput != "" {
-		g.joinServerStep = 1
+		g.joinServerErrorCode = 1
 	}
 
 	return false
 }
+
+
 func (g *Game) HandleLobbyScreen() bool {
-	println(g.lobbyReady)
 	if g.lobbyReady {
 		return true
 	}

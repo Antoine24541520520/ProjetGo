@@ -45,21 +45,40 @@ func (g *Game) DrawJoinServerScreen(screen *ebiten.Image) {
 		screenHeight/2-20,
 	)
 
-	if g.joinServerStep == 2 {
+	if g.tryingToConnect {
+		ebitenutil.DebugPrintAt(
+			screen,
+			"Trying to connect...",
+			screenWidth/2-60,
+			screenHeight/2+60,
+		)
+	}
+
+	var message string
+	if g.joinServerErrorCode == 2 {
+		message = "Invalid IP"
+	} else if g.joinServerErrorCode == 3 {
+		message = g.client_Error_Messages
+	}
+
+	if message != "" {
+		// Calculate the width of the text in pixels
+		textWidth := len(message) * 8 // 8 is an approximate pixel width of a character
+
 		// Create a red rectangle image
-		rectImg := ebiten.NewImage(100, 25)      // Adjust size to match your text
-		rectImg.Fill(color.RGBA{255, 0, 0, 135}) // Change 80 to 255 for a solid color
+		rectImg := ebiten.NewImage(textWidth, 25)  // Adjust height to match your text
+		rectImg.Fill(color.RGBA{255, 0, 0, 135})   // Change 135 to 255 for a solid color
 
 		// Draw the red rectangle image on the screen
 		opts := &ebiten.DrawImageOptions{}
-		opts.GeoM.Translate(float64(screenWidth/2-50), float64(screenHeight/2+36)) // Adjust position to match your text
+		opts.GeoM.Translate(float64(screenWidth/2)-(float64(textWidth)/2), float64(screenHeight/2+36)) // Adjust position to match your text
 		screen.DrawImage(rectImg, opts)
 
 		// Now draw the text
 		ebitenutil.DebugPrintAt(
 			screen,
-			"Invalid IP",
-			screenWidth/2-30,
+			message,
+			int(screenWidth/2)-(textWidth/2), // convert float to int for DebugPrintAt
 			screenHeight/2+40,
 		)
 	}
@@ -71,6 +90,7 @@ func (g *Game) DrawJoinServerScreen(screen *ebiten.Image) {
 		screenHeight/2+10,
 	)
 }
+
 func (g *Game) DrawLobbyScreen(screen *ebiten.Image) {
 	ebitenutil.DebugPrintAt(
 		screen,
