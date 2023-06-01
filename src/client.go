@@ -5,6 +5,12 @@ import (
 	"fmt"
 	"net"
 	"strings"
+	"sync"
+)
+
+var (
+	lockedFlag bool
+	lockMu     sync.Mutex
 )
 
 func client(g *Game, ip string) error {
@@ -31,8 +37,10 @@ func client(g *Game, ip string) error {
 		if "ready" == token {
 			g.lobbyReady = true
 		}
+		if "start" == token {
+			g.start = true
+		}
 		if tokenSplited[0] == "num_client" {
-			fmt.Println(tokenSplited[1])
 			g.numClient = tokenSplited[1]
 		}
 	}
@@ -46,4 +54,12 @@ func client(g *Game, ip string) error {
 
 func sendSpace(conn net.Conn) {
 	fmt.Fprintln(conn, "space")
+}
+func sendLockChoice(conn net.Conn) {
+	lockMu.Lock()
+	if !lockedFlag {
+		fmt.Fprintln(conn, "locked")
+		lockedFlag = true
+	}
+	lockMu.Unlock()
 }
