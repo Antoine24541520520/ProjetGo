@@ -19,7 +19,8 @@ import (
 	"fmt"
 	"net"
 	"time"
-
+	"context"
+	"errors"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
@@ -44,41 +45,58 @@ func connectToServer(serverName string) error {
 }
 
 func (g *Game) HandleJoinServerScreen() bool {
-	if inpututil.IsKeyJustPressed(ebiten.KeyBackspace) && len(ipInput) > 0 {
-		ipInput = ipInput[:len(ipInput)-1]
-	}
+    if inpututil.IsKeyJustPressed(ebiten.KeyBackspace) && len(ipInput) > 0 {
+        ipInput = ipInput[:len(ipInput)-1]
+    }
 
-	if ebiten.IsKeyPressed(ebiten.KeyEnter) {
-		if validIP(ipInput) {
-			fmt.Println("IP address is valid:", ipInput)
-			g.joinServerStep = 1
-			return true
-		} else {
-			fmt.Println("Invalid IP address:", ipInput)
-			ipInput = ""
-			g.joinServerStep = 2
-		}
-	} else {
-		keys := ebiten.InputChars()
-		for _, key := range keys {
-			if len(ipInput) < 15 {
-				ipInput += string(key)
+    if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
+        if validIP(ipInput) {
+			errChan := make(chan error, 1)
+		
+			ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+			defer cancel()
+			
+			go func() {
+				errChan <- client(ctx, g, ipInput)
+			}()
+			
+			err := <-errChan
+			if err != nil {
+				if errors.Is(err, context.DeadlineExceeded) {
+					fmt.Println("Connection timeout")
+				} else {
+					fmt.Println("Failed to connect to server:", err)
+				}
+				ipInput = ""
+				g.joinServerStep = 2
+			} else {
+				fmt.Println("Connected to server successfully")
+				g.joinServerStep = 1
+				return true
 			}
 		}
-	}
-
-	if ipInput != "" {
-		g.joinServerStep = 1
-	}
+    } else {
+        keys := ebiten.InputChars()
+        for _, key := range keys {
+            if len(ipInput) < 15 && key != ' ' {
+                ipInput += string(key)
+            }
+        }
+    }
 	
-	return false
+    if ipInput != "" {
+        g.joinServerStep = 1
+    }
+
+    return false
 }
 
 
-	func validIP(ip string) bool {
-		parsedIP := net.ParseIP(ip)
-		return parsedIP != nil
-	}
+
+func validIP(ip string) bool {
+	parsedIP := net.ParseIP(ip)
+	return parsedIP != nil
+}
 
 // ChooseRunners loops over all the runners to check which sprite each
 // of them selected

@@ -13,6 +13,7 @@ import (
 	"image"
 	"log"
 	"time"
+	"net"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -22,6 +23,7 @@ type Game struct {
 	runnerImage *ebiten.Image // Image with all the sprites of the runners
 	runners     [4]Runner     // The four runners used in the game
 	f           Field         // The running field
+	client_connection net.Conn // connection between client and server   
 	joinServerStep int        // Current step in JoinServer state
 	launchStep  int           // Current step in StateLaunchRun state
 	resultStep  int           // Current step in StateResult state
