@@ -30,7 +30,6 @@ func client(g *Game, ip string) error {
 		}
 		if "ready" == token {
 			g.lobbyReady = true
-			break
 		}
 		if tokenSplited[0] == "num_client" {
 			fmt.Println(tokenSplited[1])

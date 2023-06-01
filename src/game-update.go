@@ -29,7 +29,6 @@ func (g *Game) HandleWelcomeScreen() bool {
 	return inpututil.IsKeyJustPressed(ebiten.KeySpace)
 }
 
-
 func (g *Game) HandleJoinServerScreen() bool {
 	if inpututil.IsKeyJustPressed(ebiten.KeyBackspace) && len(g.ipInput) > 0 {
 		g.ipInput = g.ipInput[:len(g.ipInput)-1]
@@ -60,7 +59,6 @@ func (g *Game) HandleJoinServerScreen() bool {
 	return false
 }
 func (g *Game) HandleLobbyScreen() bool {
-	println(g.lobbyReady)
 	if g.lobbyReady {
 		return true
 	}

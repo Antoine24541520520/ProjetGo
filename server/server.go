@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	maxClients = 4
+	maxClients = 2
 )
 
 var (
