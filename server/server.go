@@ -54,7 +54,7 @@ func main() {
 		}
 		if clientCount == maxClients {
 			for clientConn := range clients {
-				fmt.Fprintln(clientConn, "Ready")
+				fmt.Fprintln(clientConn, "ready")
 			}
 		}
 		mu.Unlock()

@@ -21,6 +21,7 @@ import (
 type Game struct {
 	state             int // Current state of the game
 	ipInput           string
+	lobbyReady        bool
 	runnerImage       *ebiten.Image // Image with all the sprites of the runners
 	runners           [4]Runner     // The four runners used in the game
 	f                 Field         // The running field

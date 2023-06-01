@@ -50,8 +50,11 @@ func (g *Game) HandleJoinServerScreen() bool {
 	if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
 		if validIP(g.ipInput) {
 			go client(g, g.ipInput)
+			return true
+		} else {
 			g.ipInput = ""
 			g.joinServerStep = 2
+			return false
 		}
 	} else {
 		keys := ebiten.InputChars()
@@ -66,6 +69,13 @@ func (g *Game) HandleJoinServerScreen() bool {
 		g.joinServerStep = 1
 	}
 
+	return false
+}
+func (g *Game) HandleLobbyScreen() bool {
+	println(g.lobbyReady)
+	if g.lobbyReady {
+		return true
+	}
 	return false
 }
 
@@ -164,6 +174,11 @@ func (g *Game) Update() error {
 		}
 	case StateJoinServer:
 		done := g.HandleJoinServerScreen()
+		if done {
+			g.state++
+		}
+	case StateLobbyScreen:
+		done := g.HandleLobbyScreen()
 		if done {
 			g.state++
 		}
