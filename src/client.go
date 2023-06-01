@@ -2,45 +2,38 @@ package main
 
 import (
 	"bufio"
-	"context"
 	"fmt"
 	"net"
 )
 
-func client(ctx context.Context, g *Game, ip string) error {
-    port := "1234"
-    var d net.Dialer
-    conn, err := d.DialContext(ctx, "tcp", ip+":"+port)
-    if err != nil {
-        return err
-    }
-    defer conn.Close()
+func client(g *Game, ip string) error {
+	port := "1234"
 
-    // Send "Ping" message
-    sendSpace(conn)
+	var err error
+	g.client_connection, err = net.Dial("tcp", ip+":"+port)
+	if err != nil {
+		return err
+	}
+	defer g.client_connection.Close()
 
-    errChan := make(chan error, 1)
-    go func() {
-        scanner := bufio.NewScanner(conn)
-        for scanner.Scan() {
-            token := scanner.Text()
-            fmt.Println("receive:", token)
-            if "stop" == token {
-                fmt.Fprintln(conn, "stop")
-                break
-            }
-        }
-        if err := scanner.Err(); err != nil {
-            errChan <- err
-        }
-    }()
+	// Send "Ping" message
+	sendSpace(g.client_connection)
 
-    select {
-    case <-ctx.Done():
-        return ctx.Err()
-    case err := <-errChan:
-        return err
-    }
+	scanner := bufio.NewScanner(g.client_connection)
+	for scanner.Scan() {
+		token := scanner.Text()
+		fmt.Println("receive:", token)
+		if "stop" == token {
+			fmt.Fprintln(g.client_connection, "stop")
+			break
+		}
+	}
+
+	if err := scanner.Err(); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func sendSpace(conn net.Conn) {

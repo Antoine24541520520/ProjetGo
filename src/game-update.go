@@ -50,30 +50,10 @@ func (g *Game) HandleJoinServerScreen() bool {
     }
 
     if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
-        if validIP(ipInput) {
-			errChan := make(chan error, 1)
-		
-			ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
-			defer cancel()
-			
-			go func() {
-				errChan <- client(ctx, g, ipInput)
-			}()
-			
-			err := <-errChan
-			if err != nil {
-				if errors.Is(err, context.DeadlineExceeded) {
-					fmt.Println("Connection timeout")
-				} else {
-					fmt.Println("Failed to connect to server:", err)
-				}
-				ipInput = ""
-				g.joinServerStep = 2
-			} else {
-				fmt.Println("Connected to server successfully")
-				g.joinServerStep = 1
-				return true
-			}
+        if validIP(ipInput) {			
+			go client(g, ipInput)
+			ipInput = ""
+			g.joinServerStep = 2
 		}
     } else {
         keys := ebiten.InputChars()
