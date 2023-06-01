@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"net"
+	"strings"
 )
 
 func client(g *Game, ip string) error {
@@ -21,10 +22,15 @@ func client(g *Game, ip string) error {
 	scanner := bufio.NewScanner(g.client_connection)
 	for scanner.Scan() {
 		token := scanner.Text()
+		tokenSplited := strings.Split(token, "#")
 		fmt.Println("receive:", token)
 		if "stop" == token {
 			fmt.Fprintln(g.client_connection, "stop")
 			break
+		}
+		if tokenSplited[0] == "num_client" {
+			fmt.Println(tokenSplited[1])
+			g.numClient = tokenSplited[1]
 		}
 	}
 
