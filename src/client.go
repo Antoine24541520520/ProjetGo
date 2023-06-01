@@ -19,7 +19,9 @@ func receiveMessage(g Game){
 		}
 		if "ready" == token {
 			g.lobbyReady = true
-			break
+		}
+		if "start" == token {
+			g.start = true
 		}
 		if tokenSplited[0] == "num_client" {
 			g.numClient = tokenSplited[1]
@@ -34,4 +36,8 @@ func receiveMessage(g Game){
 func sendSpace(conn net.Conn) {
 	fmt.Fprintln(conn, "space")
 	fmt.Println("space")
+}
+
+func sendLockChoice(conn net.Conn) {
+	fmt.Fprintln(conn, "locked")
 }
