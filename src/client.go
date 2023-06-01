@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func receiveMessage(g Game){
+func receiveMessage(g *Game) {
 	scanner := bufio.NewScanner(g.client_connection)
 	for scanner.Scan() {
 		token := scanner.Text()
@@ -27,7 +27,7 @@ func receiveMessage(g Game){
 			g.numClient = tokenSplited[1]
 		}
 	}
-	
+
 	if err := scanner.Err(); err != nil {
 		fmt.Println("Error:", err)
 	}

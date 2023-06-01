@@ -1,3 +1,4 @@
+// go build serverTest.go && ./serverTest
 package main
 
 import (
@@ -16,11 +17,9 @@ var (
 	clientCount    int
 	clients        = make(map[net.Conn]struct{})
 	mu             sync.Mutex
-	readyClients   int
+	readyClients   sync.WaitGroup
 	lockReady      bool
 	lockReadyMutex sync.Mutex
-	clientLocks    = make(map[net.Conn]bool)
-	clientLocksMu  sync.Mutex
 )
 
 func main() {
@@ -50,9 +49,6 @@ func main() {
 		}
 		clientCount++
 		clients[conn] = struct{}{}
-		clientLocksMu.Lock()
-		clientLocks[conn] = false
-		clientLocksMu.Unlock()
 		fmt.Printf("num_client#%v", clientCount)
 		for clientConn := range clients {
 
@@ -66,6 +62,7 @@ func main() {
 				fmt.Fprintln(clientConn, "ready")
 			}
 		}
+
 		mu.Unlock()
 
 		wg.Add(1)
@@ -104,17 +101,14 @@ func handleConnection(conn net.Conn, wg *sync.WaitGroup) {
 			mu.Unlock()
 		}
 		if msg == "locked\n" {
-			clientLocksMu.Lock()
-			if !clientLocks[conn] {
-				clientLocks[conn] = true
-				readyClients++
-				if readyClients == maxClients && lockReady {
-					for clientConn := range clients {
-						fmt.Fprintln(clientConn, "start")
-					}
+			lockReadyMutex.Lock()
+			readyClients.Add(1)
+			if readyClients.Wait(); lockReady {
+				for clientConn := range clients {
+					fmt.Fprintln(clientConn, "start")
 				}
 			}
-			clientLocksMu.Unlock()
+			lockReadyMutex.Unlock()
 		}
 
 		if _, err := writer.WriteString(msg); err != nil {
@@ -130,9 +124,11 @@ func handleConnection(conn net.Conn, wg *sync.WaitGroup) {
 
 	mu.Lock()
 	clientCount--
-	readyClients--
+	if lockReady {
+		readyClients.Add(-1)
+	}
+	lockReady = false
 	delete(clients, conn)
-	delete(clientLocks, conn)
 	for clientConn := range clients {
 
 		fmt.Fprintf(clientConn, "num_client#%v\n", clientCount)

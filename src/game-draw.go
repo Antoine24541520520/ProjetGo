@@ -63,11 +63,11 @@ func (g *Game) DrawJoinServerScreen(screen *ebiten.Image) {
 
 	if message != "" {
 		// Calculate the width of the text in pixels
-		textWidth := len(message) * 8 // 8 is an approximate pixel width of a character
+		textWidth := len(message) * 7
 
 		// Create a red rectangle image
-		rectImg := ebiten.NewImage(textWidth, 25)  // Adjust height to match your text
-		rectImg.Fill(color.RGBA{255, 0, 0, 135})   // Change 135 to 255 for a solid color
+		rectImg := ebiten.NewImage(textWidth, 25) // Adjust height to match your text
+		rectImg.Fill(color.RGBA{255, 0, 0, 135})  // Change 135 to 255 for a solid color
 
 		// Draw the red rectangle image on the screen
 		opts := &ebiten.DrawImageOptions{}

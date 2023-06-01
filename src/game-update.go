@@ -106,7 +106,6 @@ func (g *Game) HandleJoinServerScreen() bool {
 	return false
 }
 
-
 func (g *Game) HandleLobbyScreen() bool {
 	if g.lobbyReady {
 		return true
@@ -130,6 +129,12 @@ func (g *Game) ChooseRunners() (done bool) {
 			done = g.runners[i].RandomChoose() && done
 		}
 	}
+
+	if done && !g.pickReady {
+		go sendLockChoice(g.client_connection)
+		g.pickReady = true
+	}
+
 	return done
 }
 
