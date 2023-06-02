@@ -125,14 +125,10 @@ func validIP(ip string) bool {
 // of them selected
 func (g *Game) ChooseRunners() (done bool) {
 	done = true
-	for i := range g.runners {
-		if i == 0 {
-			done = g.runners[i].ManualChoose(g) && done
-			if done && !g.pickReady {
-				go sendLockChoice(g.client_connection, g.runners[i].colorScheme)
-				g.pickReady = true
-			}
-		}
+	done = g.runners[g.posMainRunner].ManualChoose(g) && done
+	if done && !g.pickReady {
+		go sendLockChoice(g.client_connection, g.runners[g.posMainRunner].colorScheme)
+		g.pickReady = true
 	}
 
 	return done
@@ -153,20 +149,14 @@ func (g *Game) HandleLaunchRun() bool {
 
 // UpdateRunners loops over all the runners to update each of them
 func (g *Game) UpdateRunners() {
-	for i := range g.runners {
-		if i == 0 {
-			g.runners[i].ManualUpdate(g)
-		} else {
-			g.runners[i].RandomUpdate(g)
-		}
-	}
+	g.runners[g.posMainRunner].ManualUpdate(g)
 }
 
 // CheckArrival loops over all the runners to check which ones are arrived
 func (g *Game) CheckArrival() (finished bool) {
 	finished = true
 	for i := range g.runners {
-		g.runners[i].CheckArrival(&g.f)
+		g.runners[i].CheckArrival(g, &g.f)
 		finished = finished && g.runners[i].arrived
 	}
 	return finished

@@ -19,8 +19,8 @@ import (
 )
 
 type Game struct {
-	idRunner              int
 	state                 int // Current state of the game
+	posMainRunner         int
 	debugInt              int
 	ipInput               string
 	lobbyReady            bool

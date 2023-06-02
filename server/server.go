@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	maxClients = 2
+	maxClients = 4
 )
 
 var (
@@ -20,7 +20,7 @@ var (
 	mu             sync.Mutex
 	lockReadyMutex sync.Mutex
 	clientLocksMu  sync.Mutex
-	clients        = make(map[net.Conn]int) // Changes here
+	clients        = make(map[net.Conn]int)
 	clientLocks    = make(map[net.Conn]bool)
 )
 
@@ -50,14 +50,14 @@ func main() {
 			continue
 		}
 		clientCount++
-		clients[conn] = clientCount // Changes here
+		clients[conn] = clientCount
 		clientLocksMu.Lock()
 		clientLocks[conn] = false
 		clientLocksMu.Unlock()
 		fmt.Printf("num_client#%v", clientCount)
-		for clientConn, id := range clients { // Changes here
+		for clientConn, id := range clients {
 
-			fmt.Fprintf(clientConn, "num_client#%v\n", id) // Changes here
+			fmt.Fprintf(clientConn, "num_client#%v\n", id)
 		}
 		if clientCount == maxClients {
 			lockReadyMutex.Lock()
@@ -76,10 +76,25 @@ func main() {
 	wg.Wait()
 }
 
+func broadcastMessage(sender net.Conn, message string) {
+	mu.Lock()
+	defer mu.Unlock()
+	for clientConn := range clients {
+		if clientConn != sender {
+			fmt.Fprint(clientConn, message)
+		}
+	}
+}
+
 func handleConnection(conn net.Conn, wg *sync.WaitGroup) {
 	defer wg.Done()
 
+	clientID := clients[conn]
+
 	fmt.Printf("Client %s connected\n", conn.RemoteAddr())
+
+	id := fmt.Sprintf("id/%v\n", clientID)
+	fmt.Fprintf(conn, id)
 
 	reader := bufio.NewReader(conn)
 
@@ -99,20 +114,13 @@ func handleConnection(conn net.Conn, wg *sync.WaitGroup) {
 				continue
 			}
 
-			clientID := clients[conn]
 			value := splitMsg[1]
 
 			spaceMsg := fmt.Sprintf("space/%v/%s\n", clientID, value)
 
 			fmt.Printf("Client %v pressed space with value: %s \n", clientID, value)
 
-			mu.Lock()
-			for clientConn := range clients {
-				if clientConn != conn {
-					fmt.Fprint(clientConn, spaceMsg)
-				}
-			}
-			mu.Unlock()
+			broadcastMessage(conn, spaceMsg)
 		}
 
 		if strings.HasPrefix(msg, "locked") {
@@ -122,16 +130,9 @@ func handleConnection(conn net.Conn, wg *sync.WaitGroup) {
 				continue
 			}
 			value := splitMsg[1]
-			clientID := clients[conn]
 			lockedMsg := fmt.Sprintf("locked/%v/%v\n", clientID, value)
 
-			mu.Lock()
-			for clientConn := range clients {
-				if clientConn != conn {
-					fmt.Fprintf(clientConn, lockedMsg)
-				}
-			}
-			mu.Unlock()
+			broadcastMessage(conn, lockedMsg)
 
 			clientLocksMu.Lock()
 			if !clientLocks[conn] {
@@ -144,7 +145,22 @@ func handleConnection(conn net.Conn, wg *sync.WaitGroup) {
 				}
 				clientLocksMu.Unlock()
 			}
+		}
 
+		if strings.HasPrefix(msg, "finish") {
+			splitMsg := strings.Split(strings.TrimSuffix(msg, "\n"), "/")
+			if len(splitMsg) < 2 {
+				fmt.Println("Invalid finish message format")
+				continue
+			}
+
+			value := splitMsg[1]
+
+			finishMsg := fmt.Sprintf("finish/%v/%s\n", clientID, value)
+
+			fmt.Printf("Client %v finished with time: %s\n", clientID, value)
+
+			broadcastMessage(conn, finishMsg)
 		}
 	}
 
