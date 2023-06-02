@@ -157,7 +157,7 @@ func (g *Game) CheckArrival() (finished bool) {
 	finished = true
 	g.runners[g.posMainRunner].CheckArrival(g, &g.f)
 
-	if g.runners[g.posMainRunner].arrived && g.runners[g.posMainRunner].waitingOtherToFinish {
+	if g.runners[g.posMainRunner].arrived && !g.runners[g.posMainRunner].waitingOtherToFinish {
 		go sendFinishTime(g.client_connection, g.runners[g.posMainRunner].runTime)
 		g.runners[g.posMainRunner].waitingOtherToFinish = true
 	}
