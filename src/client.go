@@ -78,8 +78,14 @@ func receiveMessage(g *Game) {
 				fmt.Println("Invalid xpos")
 				continue
 			}
+			speed, err := strconv.ParseFloat(splitToken[3], 64)
+			if err != nil {
+				fmt.Println("Invalid xpos")
+				continue
+			}
 
 			g.runners[runnerID-1].xpos = xpos
+			g.runners[runnerID-1].speed = speed
 		}
 
 		if strings.HasPrefix(token, "finish") {
@@ -98,6 +104,7 @@ func receiveMessage(g *Game) {
 				fmt.Println("Invalid finish time")
 				continue
 			}
+
 			g.runners[runnerID-1].runTime = finishTime
 			g.runners[runnerID-1].arrived = true
 		}
@@ -114,8 +121,8 @@ func sendFinishTime(conn net.Conn, finishTime time.Duration) {
 	fmt.Fprint(conn, msg)
 }
 
-func sendSpace(conn net.Conn, newPos float64) {
-	msg := fmt.Sprintf("space/%f\n", newPos)
+func sendSpace(conn net.Conn, newPos float64, speed float64) {
+	msg := fmt.Sprintf("space/%f/%f\n", newPos, speed)
 	fmt.Fprint(conn, msg)
 }
 

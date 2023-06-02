@@ -29,17 +29,18 @@ import (
 )
 
 type Runner struct {
-	xpos, ypos        float64       // Position of the runner on the screen
-	speed             float64       // Current speed of the runner
-	framesSinceUpdate int           // Number of frames since last speed update
-	maxFrameInterval  int           // Maximum number of frames between two speed updates
-	arrived           bool          // Tells if the runner has finished running or not
-	runTime           time.Duration // Records the duration of the run for ranking
-	image             *ebiten.Image // Current image used to display the runner
-	colorScheme       int           // Number of the color scheme of the runner
-	colorSelected     bool          // Tells if the color scheme is fixed or not
-	animationStep     int           // Current step of the runner animation
-	animationFrame    int           // Number of frames since the last animation step
+	xpos, ypos           float64 // Position of the runner on the screen
+	speed                float64 // Current speed of the runner
+	framesSinceUpdate    int     // Number of frames since last speed update
+	maxFrameInterval     int     // Maximum number of frames between two speed updates
+	arrived              bool    // Tells if the runner has finished running or not
+	waitingOtherToFinish bool
+	runTime              time.Duration // Records the duration of the run for ranking
+	image                *ebiten.Image // Current image used to display the runner
+	colorScheme          int           // Number of the color scheme of the runner
+	colorSelected        bool          // Tells if the color scheme is fixed or not
+	animationStep        int           // Current step of the runner animation
+	animationFrame       int           // Number of frames since the last animation step
 }
 
 // ManualUpdate allows to use the keyboard in order to control a runner
@@ -49,7 +50,7 @@ func (r *Runner) ManualUpdate(g *Game) {
 	r.UpdateSpeed(inpututil.IsKeyJustPressed(ebiten.KeySpace), g, true)
 	r.UpdatePos()
 	if r.xpos != initialXpos {
-		go sendSpace(g.client_connection, r.xpos)
+		go sendSpace(g.client_connection, r.xpos, r.speed)
 	}
 }
 
@@ -139,6 +140,7 @@ func (r *Runner) Reset(f *Field) {
 	r.xpos = f.xstart
 	r.speed = 0
 	r.framesSinceUpdate = 0
+	r.waitingOtherToFinish = false
 	r.arrived = false
 	r.animationStep = 0
 	r.animationFrame = 0

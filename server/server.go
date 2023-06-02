@@ -108,16 +108,17 @@ func handleConnection(conn net.Conn, wg *sync.WaitGroup) {
 
 		if strings.HasPrefix(msg, "space") {
 			splitMsg := strings.Split(strings.TrimSuffix(msg, "\n"), "/")
-			if len(splitMsg) < 2 {
+			if len(splitMsg) < 3 {
 				fmt.Println("Invalid space message format")
 				continue
 			}
 
-			value := splitMsg[1]
+			pos := splitMsg[1]
+			speed := splitMsg[2]
 
-			spaceMsg := fmt.Sprintf("space/%v/%s\n", clientID, value)
+			spaceMsg := fmt.Sprintf("space/%v/%s/%s\n", clientID, pos, speed)
 
-			fmt.Printf("Client %v pressed space with value: %s \n", clientID, value)
+			fmt.Printf("Client %v pressed space with value: %s \n", clientID, speed)
 
 			broadcastMessage(conn, spaceMsg)
 		}

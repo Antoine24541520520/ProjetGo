@@ -33,7 +33,7 @@ func (g *Game) HandleWelcomeScreen() bool {
 func (g *Game) HandleJoinServerScreen() bool {
 
 	if g.debugInt == 0 {
-		g.ipInput = "172.21.65.22"
+		g.ipInput = "172.21.65.212"
 		g.debugInt++
 	}
 
@@ -155,8 +155,14 @@ func (g *Game) UpdateRunners() {
 // CheckArrival loops over all the runners to check which ones are arrived
 func (g *Game) CheckArrival() (finished bool) {
 	finished = true
+	g.runners[g.posMainRunner].CheckArrival(g, &g.f)
+
+	if g.runners[g.posMainRunner].arrived && g.runners[g.posMainRunner].waitingOtherToFinish {
+		go sendFinishTime(g.client_connection, g.runners[g.posMainRunner].runTime)
+		g.runners[g.posMainRunner].waitingOtherToFinish = true
+	}
+
 	for i := range g.runners {
-		g.runners[i].CheckArrival(g, &g.f)
 		finished = finished && g.runners[i].arrived
 	}
 	return finished
