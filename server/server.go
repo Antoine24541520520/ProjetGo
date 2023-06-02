@@ -55,9 +55,8 @@ func main() {
 		clientLocks[conn] = false
 		clientLocksMu.Unlock()
 		fmt.Printf("num_client#%v", clientCount)
-		for clientConn, id := range clients {
-
-			fmt.Fprintf(clientConn, "num_client#%v\n", id)
+		for clientConn := range clients {
+			fmt.Fprintf(clientConn, "num_client#%v\n", clientCount)
 		}
 		if clientCount == maxClients {
 			lockReadyMutex.Lock()

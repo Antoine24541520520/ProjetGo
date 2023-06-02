@@ -29,7 +29,6 @@ import (
 )
 
 type Runner struct {
-	id                int
 	xpos, ypos        float64       // Position of the runner on the screen
 	speed             float64       // Current speed of the runner
 	framesSinceUpdate int           // Number of frames since last speed update
