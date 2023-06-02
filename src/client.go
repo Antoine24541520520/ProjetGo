@@ -99,6 +99,7 @@ func receiveMessage(g *Game) {
 				continue
 			}
 			g.runners[runnerID-1].runTime = finishTime
+			g.runners[runnerID-1].arrived = true
 		}
 
 	}

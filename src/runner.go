@@ -132,7 +132,6 @@ func (r *Runner) CheckArrival(g *Game, f *Field) {
 	if !r.arrived {
 		r.arrived = r.xpos > f.xarrival
 		r.runTime = time.Since(f.chrono)
-		go sendFinishTime(g.client_connection, r.runTime)
 	}
 }
 
