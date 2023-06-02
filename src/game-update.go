@@ -31,6 +31,12 @@ func (g *Game) HandleWelcomeScreen() bool {
 }
 
 func (g *Game) HandleJoinServerScreen() bool {
+
+	if g.debugInt == 0 {
+		g.ipInput = "172.21.65.22"
+		g.debugInt++
+	}
+
 	if inpututil.IsKeyJustPressed(ebiten.KeyBackspace) && len(g.ipInput) > 0 {
 		g.ipInput = g.ipInput[:len(g.ipInput)-1]
 	}
@@ -68,16 +74,16 @@ func (g *Game) HandleJoinServerScreen() bool {
 				}()
 
 				select {
-				case err := <-errChan:
-					g.joinServerErrorCode = 3
-					g.client_Error_Messages = err.Error()
-					g.ipInput = ""
-					g.connectionStatusChan <- 3
 				case conn := <-connChan:
 					g.client_connection = conn
 					fmt.Println("Client connecté")
 					go receiveMessage(g)
 					g.connectionStatusChan <- 1
+				case err := <-errChan:
+					g.joinServerErrorCode = 3
+					g.client_Error_Messages = err.Error()
+					g.ipInput = ""
+					g.connectionStatusChan <- 3
 				case <-time.After(5 * time.Second):
 					g.joinServerErrorCode = 3
 					g.client_Error_Messages = "Connection timeout"
@@ -106,7 +112,6 @@ func (g *Game) HandleJoinServerScreen() bool {
 	return false
 }
 
-
 func (g *Game) HandleLobbyScreen() bool {
 	if g.lobbyReady {
 		return true
@@ -126,10 +131,13 @@ func (g *Game) ChooseRunners() (done bool) {
 	for i := range g.runners {
 		if i == 0 {
 			done = g.runners[i].ManualChoose(g) && done
-		} else {
-			done = g.runners[i].RandomChoose() && done
+			if done && !g.pickReady {
+				go sendLockChoice(g.client_connection, g.runners[i].colorScheme)
+				g.pickReady = true
+			}
 		}
 	}
+
 	return done
 }
 

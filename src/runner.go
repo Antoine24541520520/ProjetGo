@@ -29,6 +29,7 @@ import (
 )
 
 type Runner struct {
+	id                int
 	xpos, ypos        float64       // Position of the runner on the screen
 	speed             float64       // Current speed of the runner
 	framesSinceUpdate int           // Number of frames since last speed update
@@ -106,22 +107,16 @@ func (r *Runner) UpdateAnimation(runnerImage *ebiten.Image) {
 // runner when the game is in StateChooseRunner state (i.e. at player selection
 // screen)
 func (r *Runner) ManualChoose(g *Game) (done bool) {
-	if !g.start {
-		if !r.colorSelected && inpututil.IsKeyJustPressed(ebiten.KeySpace) {
-			go sendLockChoice(g.client_connection)
-			r.colorSelected = true
-		} else if r.colorSelected && inpututil.IsKeyJustPressed(ebiten.KeySpace) {
-			go sendLockChoice(g.client_connection)
-			r.colorSelected = false
+	r.colorSelected =
+		(!r.colorSelected && inpututil.IsKeyJustPressed(ebiten.KeySpace)) ||
+			(r.colorSelected && !inpututil.IsKeyJustPressed(ebiten.KeySpace))
+	if !r.colorSelected {
+		if inpututil.IsKeyJustPressed(ebiten.KeyRight) {
+			r.colorScheme = (r.colorScheme + 1) % 8
+		} else if inpututil.IsKeyJustPressed(ebiten.KeyLeft) {
+			r.colorScheme = (r.colorScheme + 7) % 8
 		}
 
-		if !r.colorSelected {
-			if inpututil.IsKeyJustPressed(ebiten.KeyRight) {
-				r.colorScheme = (r.colorScheme + 1) % 8
-			} else if inpututil.IsKeyJustPressed(ebiten.KeyLeft) {
-				r.colorScheme = (r.colorScheme + 7) % 8
-			}
-		}
 	}
 
 	return r.colorSelected
