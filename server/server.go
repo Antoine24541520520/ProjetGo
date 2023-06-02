@@ -125,6 +125,14 @@ func handleConnection(conn net.Conn, wg *sync.WaitGroup) {
 			clientID := clients[conn]
 			lockedMsg := fmt.Sprintf("locked/%v/%v\n", clientID, value)
 
+			mu.Lock()
+			for clientConn := range clients {
+				if clientConn != conn {
+					fmt.Fprintf(clientConn, lockedMsg)
+				}
+			}
+			mu.Unlock()
+
 			clientLocksMu.Lock()
 			if !clientLocks[conn] {
 				clientLocks[conn] = true
@@ -136,13 +144,6 @@ func handleConnection(conn net.Conn, wg *sync.WaitGroup) {
 				}
 				clientLocksMu.Unlock()
 			}
-			mu.Lock()
-			for clientConn := range clients {
-				if clientConn != conn {
-					fmt.Fprintf(clientConn, lockedMsg)
-				}
-			}
-			mu.Unlock()
 
 		}
 	}

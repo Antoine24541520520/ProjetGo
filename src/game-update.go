@@ -113,10 +113,7 @@ func (g *Game) HandleJoinServerScreen() bool {
 }
 
 func (g *Game) HandleLobbyScreen() bool {
-	if g.lobbyReady {
-		return true
-	}
-	return false
+	return g.lobbyReady
 }
 
 func validIP(ip string) bool {
